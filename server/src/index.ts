@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/db";
+import  authRoutes  from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/auth", authRoutes);
 app.use(errorHandler);
 
 connectDB().then(() => {
