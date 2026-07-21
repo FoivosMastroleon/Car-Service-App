@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./utils/db";
 import  authRoutes  from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/error.middleware";
+import vehicleRoutes from "./routes/vehicle.routes";
+
 
 dotenv.config();
 
@@ -18,6 +20,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 app.use(errorHandler);
 
 connectDB().then(() => {
