@@ -34,3 +34,9 @@ export const login = async (input: LoginInput) => {
   const token = signToken(String(user._id), user.role);
   return { user: toUserDTO(user), token };
 };
+
+export const getMe = async (userId: string) => {
+  const user = await userDao.findUserById(userId);
+  if (!user) throw new AppError("User not found", 404);
+  return toUserDTO(user);
+};

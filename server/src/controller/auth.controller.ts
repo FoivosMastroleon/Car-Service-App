@@ -18,3 +18,12 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     next(error);
   }
 };
+
+export const getMe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await authService.getMe(req.user!.userId);
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
+};
