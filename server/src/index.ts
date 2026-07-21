@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/db";
+import { errorHandler } from "./middlewares/error.middleware";
 
 dotenv.config();
 
@@ -14,6 +15,8 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use(errorHandler);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
