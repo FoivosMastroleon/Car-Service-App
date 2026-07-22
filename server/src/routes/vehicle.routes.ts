@@ -11,10 +11,14 @@ import { validate } from "../middlewares/validate.middleware";
 import { createVehicleSchema, updateVehicleSchema } from "../validators/vehicle.validator";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireRole } from "../middlewares/role.middleware";
+import maintenanceRuleRoutes from "./maintenanceRules.routes";
+
 
 const router = Router();
 
 router.use(authenticate);
+router.use("/:vehicleId/maintenance-rules", maintenanceRuleRoutes);
+
 
 router.post("/", validate(createVehicleSchema), createVehicle);
 router.get("/", getMyVehicles);
