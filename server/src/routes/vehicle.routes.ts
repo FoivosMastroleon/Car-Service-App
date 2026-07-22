@@ -13,12 +13,14 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { requireRole } from "../middlewares/role.middleware";
 import maintenanceRuleRoutes from "./maintenanceRules.routes";
 import maintenanceRecordRoutes from "./maintenanceRecords.routes";
+import maintenanceStatusRoutes from "./maintenanceStatus.routes";
 
 const router = Router();
 
 router.use(authenticate);
 router.use("/:vehicleId/maintenance-rules", maintenanceRuleRoutes);
 router.use("/:vehicleId/maintenance-records", maintenanceRecordRoutes);
+router.use("/:vehicleId/maintenance-status", maintenanceStatusRoutes);
 
 router.post("/", validate(createVehicleSchema), createVehicle);
 router.get("/", getMyVehicles);
