@@ -5,6 +5,7 @@ import { connectDB } from "./utils/db";
 import  authRoutes  from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import vehicleRoutes from "./routes/vehicle.routes";
+import maintenanceTypeRoutes from "./routes/maintenanceType.routes";
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/maintenance-types", maintenanceTypeRoutes);
 app.use(errorHandler);
 
 connectDB().then(() => {
