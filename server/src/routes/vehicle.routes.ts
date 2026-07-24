@@ -14,7 +14,7 @@ import { requireRole } from "../middlewares/role.middleware";
 import maintenanceRuleRoutes from "./maintenanceRules.routes";
 import maintenanceRecordRoutes from "./maintenanceRecords.routes";
 import maintenanceStatusRoutes from "./maintenanceStatus.routes";
-import expenseRoutes from "./expenses.routes";
+import expenseRoutes from "./expense.routes";
 
 const router = Router();
 

@@ -1,7 +1,20 @@
 import { z } from "zod";
 
 export const createExpenseSchema = z.object({
-  category: z.enum(["fuel", "maintenance", "insurance", "tax", "tolls", "parking", "inspection", "other"]),
+  category: z.enum([
+    "fuel",
+    "maintenance",
+    "insurance",
+    "tax",
+    "tolls",
+    "parking",
+    "inspection",
+    "washing",
+    "parts",
+    "fines",
+    "roadside_assistance",
+    "other",
+  ]),
   amount: z.number().positive(),
   date: z.coerce.date(),
   description: z.string().max(200).optional(),

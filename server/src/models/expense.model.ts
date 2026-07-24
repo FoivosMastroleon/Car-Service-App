@@ -1,6 +1,18 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export type ExpenseCategory = "fuel" | "maintenance" | "insurance" | "tax" | "tolls" | "parking" | "inspection" | "other" ;
+export type ExpenseCategory =
+  | "fuel"
+  | "maintenance"
+  | "insurance"
+  | "tax"
+  | "tolls"
+  | "parking"
+  | "inspection"
+  | "washing"
+  | "parts"
+  | "fines"
+  | "roadside_assistance"
+  | "other";
 
 export interface IExpense extends Document {
     vehicle: Types.ObjectId;
@@ -16,8 +28,24 @@ export interface IExpense extends Document {
 const expenseSchema = new Schema<IExpense>(
     {
         vehicle: { type: Schema.Types.ObjectId, ref: "Vehicle", required: true },
-        category: { type: String, enum: ["fuel", "maintenance", "insurance", "tax", 
-            "tolls", "parking", "inspection", "other"], required: true },
+        category: {
+            type: String,
+            enum: [
+                "fuel",
+                "maintenance",
+                "insurance",
+                "tax",
+                "tolls",
+                "parking",
+                "inspection",
+                "washing",
+                "parts",
+                "fines",
+                "roadside_assistance",
+                "other",
+            ],
+            required: true,
+        },
         amount: { type: Number, required: true },
         date: { type: Date, required: true },
         description: { type: String },
