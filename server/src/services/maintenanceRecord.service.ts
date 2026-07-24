@@ -23,6 +23,12 @@ const getOwnedVehicleOrThrow = async (
   return vehicle;
 };
 
+export const getAllRecords = async () => {
+  const records = await maintenanceRecordDao.findAllRecords();
+  return records.map(toMaintenanceRecordDTO);
+};
+
+
 export const createMaintenanceRecord = async (
   vehicleId: string,
   input: CreateMaintenanceRecordInput,

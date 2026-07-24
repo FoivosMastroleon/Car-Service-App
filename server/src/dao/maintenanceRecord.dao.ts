@@ -14,6 +14,9 @@ export const findLatestRecordByVehicleAndType = (
     performedAt: -1,
   });
 
+export const findAllRecords = (): Promise<IMaintenanceRecord[]> =>
+  MaintenanceRecordModel.find().sort({ performedAt: -1 });
+
 
 export const createRecord = (data: Partial<IMaintenanceRecord>): Promise<IMaintenanceRecord> =>
   MaintenanceRecordModel.create(data);

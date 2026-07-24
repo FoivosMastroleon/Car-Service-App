@@ -6,6 +6,8 @@ export const findExpenseById = (id: string): Promise<IExpense | null> =>
 export const findExpensesByVehicle = (vehicleId: string): Promise<IExpense[]> =>
   ExpenseModel.find({ vehicle: vehicleId }).sort({ date: -1 });
 
+export const findAllExpenses = (): Promise<IExpense[]> => ExpenseModel.find().sort({ date: -1 });
+
 export const createExpense = (data: Partial<IExpense>): Promise<IExpense> =>
   ExpenseModel.create(data);
 

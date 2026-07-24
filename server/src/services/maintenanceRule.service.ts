@@ -20,6 +20,11 @@ const getOwnedVehicleOrThrow = async (
   return vehicle;
 };
 
+export const getAllRules = async () => {
+  const rules = await maintenanceRuleDao.findAllRules();
+  return rules.map(toMaintenanceRuleDTO);
+};
+
 export const createMaintenanceRule = async (
   vehicleId: string,
   input: CreateMaintenanceRuleInput,

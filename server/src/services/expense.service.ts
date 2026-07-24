@@ -59,6 +59,12 @@ export const getExpensesForVehicle = async (
   return expenses.map(toExpenseDTO);
 };
 
+export const getAllExpenses = async () => {
+  const expenses = await expenseDao.findAllExpenses();
+  return expenses.map(toExpenseDTO);
+};
+
+
 export const getExpenseById = async (id: string, requester: { userId: string; role: UserRole }) => {
   const expense = await expenseDao.findExpenseById(id);
   if (!expense) throw new AppError("Expense not found", 404);
