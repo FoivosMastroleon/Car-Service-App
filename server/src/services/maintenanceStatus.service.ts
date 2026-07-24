@@ -67,13 +67,14 @@ const computeStatus = (
   const status = STATUS_SEVERITY[kmStatus] >= STATUS_SEVERITY[dateStatus] ? kmStatus : dateStatus;
 
   return {
-    ...base,
-    lastPerformedAt: record.performedAt,
-    lastMileage: record.mileageAtService,
-    remainingKm,
-    remainingDays,
-    status,
-  };
+  ...base,
+  lastPerformedAt: record.performedAt,
+  lastMileage: record.mileageAtService,
+  lastRecordId: String(record._id),
+  remainingKm,
+  remainingDays,
+  status,
+};
 };
 
 export const getMaintenanceStatusForVehicle = async (

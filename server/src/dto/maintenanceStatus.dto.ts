@@ -7,6 +7,7 @@ export interface MaintenanceStatusDTO {
   intervalMonths?: number;
   lastPerformedAt?: Date;
   lastMileage?: number;
+  lastRecordId?: string;
   remainingKm?: number;
   remainingDays?: number;
   status: MaintenanceDueStatus;
