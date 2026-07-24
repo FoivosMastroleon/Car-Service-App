@@ -6,6 +6,7 @@ import { AppError } from "../utils/AppError";
 import { CreateExpenseInput, UpdateExpenseInput } from "../validators/expense.validator";
 import { UserRole } from "../models/user.model";
 import { Types } from "mongoose";
+import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary";
 
 const getOwnedVehicleOrThrow = async (
   vehicleId: string,
@@ -104,4 +105,20 @@ export const deleteExpense = async (id: string, requester: { userId: string; rol
   await getOwnedVehicleOrThrow(String(expense.vehicle), requester);
 
   await expenseDao.deleteExpense(id);
+};
+
+export const uploadExpenseReceipt = async (
+  id: string,
+  fileBuffer: Buffer,
+  requester: { userId: string; role: UserRole }
+) => {
+  const expense = await expenseDao.findExpenseById(id);
+  if (!expense) throw new AppError("Expense not found", 404);
+
+  await getOwnedVehicleOrThrow(String(expense.vehicle), requester);
+
+  const receiptUrl = await uploadBufferToCloudinary(fileBuffer, "carcare-ai/expenses");
+  const updated = await expenseDao.updateExpense(id, { receiptUrl });
+
+  return toExpenseDTO(updated!);
 };

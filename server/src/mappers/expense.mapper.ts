@@ -9,6 +9,7 @@ export const toExpenseDTO = (expense: IExpense): ExpenseDTO => ({
   date: expense.date,
   description: expense.description,
   maintenanceRecord: expense.maintenanceRecord?.toString(),
+  receiptUrl: expense.receiptUrl,
   createdAt: expense.createdAt,
   updatedAt: expense.updatedAt
 });

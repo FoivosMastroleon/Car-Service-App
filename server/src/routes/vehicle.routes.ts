@@ -6,6 +6,7 @@ import {
   getVehicleById,
   updateVehicle,
   deleteVehicle,
+  uploadVehiclePhoto
 } from "../controller/vehicle.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { createVehicleSchema, updateVehicleSchema } from "../validators/vehicle.validator";
@@ -16,6 +17,8 @@ import maintenanceRecordRoutes from "./maintenanceRecords.routes";
 import maintenanceStatusRoutes from "./maintenanceStatus.routes";
 import expenseRoutes from "./expense.routes";
 import reminderRoutes from "./reminder.routes";
+import { upload } from "../middlewares/upload.middleware";
+
 
 const router = Router();
 
@@ -32,5 +35,5 @@ router.get("/all", requireRole("admin"), getAllVehicles);
 router.get("/:id", getVehicleById);
 router.patch("/:id", validate(updateVehicleSchema), updateVehicle);
 router.delete("/:id", deleteVehicle);
-
+router.post("/:id/photos", upload.single("photo"), uploadVehiclePhoto);
 export default router;

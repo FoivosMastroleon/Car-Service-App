@@ -21,6 +21,7 @@ export interface IExpense extends Document {
     date: Date;
     description?: string;
     maintenanceRecord?: Types.ObjectId;
+    receiptUrl?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -50,6 +51,7 @@ const expenseSchema = new Schema<IExpense>(
         date: { type: Date, required: true },
         description: { type: String },
         maintenanceRecord: { type: Schema.Types.ObjectId, ref: "MaintenanceRecord" },
+        receiptUrl: { type: String },
     },
         { timestamps: true }
     

@@ -8,6 +8,7 @@ export interface ExpenseDTO {
     date: Date;
     description?: string;
     maintenanceRecord?: string;
+    receiptUrl?: string;
     createdAt: Date;
     updatedAt: Date;
 }

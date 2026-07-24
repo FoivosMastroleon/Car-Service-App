@@ -4,6 +4,8 @@ import { AppError } from "../utils/AppError";
 import { CreateVehicleInput, UpdateVehicleInput } from "../validators/vehicle.validator";
 import { UserRole } from "../models/user.model";
 import { Types } from "mongoose";
+import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary";
+
 
 
 export const createVehicle = async (
@@ -80,5 +82,24 @@ export const deleteVehicle = async (
   }
 
   await vehicleDao.deleteVehicle(id);
+};
+
+
+export const uploadVehiclePhoto = async (
+  id: string,
+  fileBuffer: Buffer,
+  requester: { userId: string; role: UserRole }
+) => {
+  const vehicle = await vehicleDao.findVehicleById(id);
+  if (!vehicle) throw new AppError("Vehicle not found", 404);
+
+  if (requester.role !== "admin" && String(vehicle.owner) !== requester.userId) {
+    throw new AppError("Insufficient permissions", 403);
+  }
+
+  const photoUrl = await uploadBufferToCloudinary(fileBuffer, "carcare-ai/vehicles");
+  const updated = await vehicleDao.updateVehicle(id, { photo: photoUrl });
+
+  return toVehicleDTO(updated!);
 };
 

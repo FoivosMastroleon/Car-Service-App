@@ -8,6 +8,7 @@ export const toMaintenanceRecordDTO = (maintenanceRecord: IMaintenanceRecord): M
   performedAt: maintenanceRecord.performedAt,
   mileageAtService: maintenanceRecord.mileageAtService,
   notes: maintenanceRecord.notes,
+  receiptUrl: maintenanceRecord.receiptUrl,
   createdAt: maintenanceRecord.createdAt,
   updatedAt: maintenanceRecord.updatedAt,
 });

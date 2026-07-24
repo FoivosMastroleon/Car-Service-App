@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as vehicleService from "../services/vehicle.service";
+import { AppError } from "../utils/AppError";
+
 
 export const createVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -52,5 +54,20 @@ export const deleteVehicle = async (req: Request, res: Response, next: NextFunct
     res.status(204).send();
   } catch (err) {
     next(err);
+  }
+};
+
+export const uploadVehiclePhoto = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) throw new AppError("No file uploaded", 400);
+
+    const vehicle = await vehicleService.uploadVehiclePhoto(
+      req.params.id as string,
+      req.file.buffer,
+      req.user!
+    );
+    res.status(200).json(vehicle);
+  } catch (error) {
+    next(error);
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as expenseService from "../services/expense.service";
+import { AppError } from "../utils/AppError";
 
 export const createExpense = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -45,6 +46,21 @@ export const deleteExpense = async (req: Request, res: Response, next: NextFunct
   try {
     await expenseService.deleteExpense(req.params.id as string, req.user!);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadExpenseReceipt = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) throw new AppError("No file uploaded", 400);
+
+    const expense = await expenseService.uploadExpenseReceipt(
+      req.params.id as string,
+      req.file.buffer,
+      req.user!
+    );
+    res.status(200).json(expense);
   } catch (error) {
     next(error);
   }

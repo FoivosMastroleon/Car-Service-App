@@ -6,6 +6,7 @@ export interface IMaintenanceRecord extends Document {
   performedAt: Date;
   mileageAtService: number;
   notes?: string;
+  receiptUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ const maintenanceRecordSchema = new Schema<IMaintenanceRecord>(
     performedAt: { type: Date, required: true },
     mileageAtService: { type: Number, required: true, min: 0 },
     notes: { type: String },
+    receiptUrl: { type: String },
   },
   { timestamps: true }
 );

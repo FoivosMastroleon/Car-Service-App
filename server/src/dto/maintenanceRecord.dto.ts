@@ -5,6 +5,7 @@ export interface MaintenanceRecordDTO {
   performedAt: Date;
   mileageAtService: number;
   notes?: string;
+  receiptUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

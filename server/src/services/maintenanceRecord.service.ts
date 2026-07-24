@@ -8,6 +8,7 @@ import {
 } from "../validators/maintenanceRecord.validator";
 import { UserRole } from "../models/user.model";
 import { Types } from "mongoose";
+import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary";
 
 const getOwnedVehicleOrThrow = async (
   vehicleId: string,
@@ -99,4 +100,20 @@ export const deleteMaintenanceRecord = async (
   await getOwnedVehicleOrThrow(String(record.vehicle), requester);
 
   await maintenanceRecordDao.deleteRecord(id);
+};
+
+export const uploadMaintenanceRecordReceipt = async (
+  id: string,
+  fileBuffer: Buffer,
+  requester: { userId: string; role: UserRole }
+) => {
+  const record = await maintenanceRecordDao.findRecordById(id);
+  if (!record) throw new AppError("Maintenance record not found", 404);
+
+  await getOwnedVehicleOrThrow(String(record.vehicle), requester);
+
+  const receiptUrl = await uploadBufferToCloudinary(fileBuffer, "carcare-ai/maintenance-records");
+  const updated = await maintenanceRecordDao.updateRecord(id, { receiptUrl });
+
+  return toMaintenanceRecordDTO(updated!);
 };
