@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getMaintenanceRules, createMaintenanceRule, deleteMaintenanceRule } from "@/api/maintenanceRules";
+import {
+  getMaintenanceRules,
+  createMaintenanceRule,
+  updateMaintenanceRule,
+  deleteMaintenanceRule,
+} from "@/api/maintenanceRules";
 import { getMaintenanceTypes } from "@/api/maintenanceTypes";
 import {
   createMaintenanceRuleSchema,
@@ -15,7 +20,7 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
   const [rules, setRules] = useState<MaintenanceRule[]>([]);
   const [types, setTypes] = useState<MaintenanceType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRule, setEditingRule] = useState<MaintenanceRule | "new" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -44,19 +49,37 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
 
   const typeName = (id: string) => types.find((t) => t.id === id)?.name ?? "Unknown";
 
+  const openAddModal = () => {
+    reset({ maintenanceType: "", intervalKm: "", intervalMonths: "" });
+    setEditingRule("new");
+  };
+
+  const openEditModal = (rule: MaintenanceRule) => {
+    reset({
+      maintenanceType: rule.maintenanceType,
+      intervalKm: rule.intervalKm ? String(rule.intervalKm) : "",
+      intervalMonths: rule.intervalMonths ? String(rule.intervalMonths) : "",
+    });
+    setEditingRule(rule);
+  };
+
   const onSubmit = async (data: CreateMaintenanceRuleFields) => {
     setError(null);
+    const payload = {
+      maintenanceType: data.maintenanceType,
+      intervalKm: data.intervalKm ? Number(data.intervalKm) : undefined,
+      intervalMonths: data.intervalMonths ? Number(data.intervalMonths) : undefined,
+    };
     try {
-      await createMaintenanceRule(vehicleId, {
-        maintenanceType: data.maintenanceType,
-        intervalKm: data.intervalKm ? Number(data.intervalKm) : undefined,
-        intervalMonths: data.intervalMonths ? Number(data.intervalMonths) : undefined,
-      });
-      reset();
-      setShowAddModal(false);
+      if (editingRule && editingRule !== "new") {
+        await updateMaintenanceRule(vehicleId, editingRule.id, payload);
+      } else {
+        await createMaintenanceRule(vehicleId, payload);
+      }
+      setEditingRule(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add rule");
+      setError(err instanceof Error ? err.message : "Failed to save rule");
     }
   };
 
@@ -70,7 +93,7 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-900">Maintenance Rules</h2>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAddModal}
           className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
         >
           + Add Rule
@@ -89,12 +112,20 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
             <Card key={rule.id}>
               <div className="flex items-start justify-between">
                 <h3 className="font-medium text-slate-900">{typeName(rule.maintenanceType)}</h3>
-                <button
-                  onClick={() => handleDelete(rule.id)}
-                  className="text-slate-400 hover:text-red-600 text-sm"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2 text-sm">
+                  <button
+                    onClick={() => openEditModal(rule)}
+                    className="text-slate-400 hover:text-brand-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(rule.id)}
+                    className="text-slate-400 hover:text-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
               <div className="text-sm text-slate-500 mt-1 space-y-0.5">
                 {rule.intervalKm && <p>Every {rule.intervalKm.toLocaleString()} km</p>}
@@ -105,8 +136,11 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
         </div>
       )}
 
-      {showAddModal && (
-        <Modal title="Add Maintenance Rule" onClose={() => setShowAddModal(false)}>
+      {editingRule && (
+        <Modal
+          title={editingRule === "new" ? "Add Maintenance Rule" : "Edit Maintenance Rule"}
+          onClose={() => setEditingRule(null)}
+        >
           {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div>
@@ -152,7 +186,7 @@ const RulesTab = ({ vehicleId }: { vehicleId: string }) => {
               disabled={isSubmitting}
               className="w-full py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? "Adding..." : "Add Rule"}
+              {isSubmitting ? "Saving..." : editingRule === "new" ? "Add Rule" : "Save Changes"}
             </button>
           </form>
         </Modal>

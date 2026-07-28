@@ -18,6 +18,15 @@ export const createMaintenanceRecord = (vehicleId: string, data: CreateMaintenan
     .post<MaintenanceRecord>(`/vehicles/${vehicleId}/maintenance-records`, data)
     .then((r) => r.data);
 
+export const updateMaintenanceRecord = (
+  vehicleId: string,
+  id: string,
+  data: Partial<CreateMaintenanceRecordInput>
+) =>
+  axiosInstance
+    .patch<MaintenanceRecord>(`/vehicles/${vehicleId}/maintenance-records/${id}`, data)
+    .then((r) => r.data);
+
 export const deleteMaintenanceRecord = (vehicleId: string, id: string) =>
   axiosInstance.delete(`/vehicles/${vehicleId}/maintenance-records/${id}`);
 

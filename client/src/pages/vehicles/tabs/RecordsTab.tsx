@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   getMaintenanceRecords,
   createMaintenanceRecord,
+  updateMaintenanceRecord,
   deleteMaintenanceRecord,
+  uploadMaintenanceRecordReceipt,
 } from "@/api/maintenanceRecords";
 import { getMaintenanceTypes } from "@/api/maintenanceTypes";
 import {
@@ -19,8 +21,11 @@ const RecordsTab = ({ vehicleId }: { vehicleId: string }) => {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
   const [types, setTypes] = useState<MaintenanceType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | "new" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+  const receiptTargetId = useRef<string | null>(null);
 
   const {
     register,
@@ -48,15 +53,33 @@ const RecordsTab = ({ vehicleId }: { vehicleId: string }) => {
 
   const typeName = (id: string) => types.find((t) => t.id === id)?.name ?? "Unknown";
 
+  const openAddModal = () => {
+    reset({ maintenanceType: "", performedAt: "", mileageAtService: 0, notes: "" });
+    setEditingRecord("new");
+  };
+
+  const openEditModal = (record: MaintenanceRecord) => {
+    reset({
+      maintenanceType: record.maintenanceType,
+      performedAt: record.performedAt.slice(0, 10),
+      mileageAtService: record.mileageAtService,
+      notes: record.notes,
+    });
+    setEditingRecord(record);
+  };
+
   const onSubmit = async (data: CreateMaintenanceRecordFields) => {
     setError(null);
     try {
-      await createMaintenanceRecord(vehicleId, data);
-      reset();
-      setShowAddModal(false);
+      if (editingRecord && editingRecord !== "new") {
+        await updateMaintenanceRecord(vehicleId, editingRecord.id, data);
+      } else {
+        await createMaintenanceRecord(vehicleId, data);
+      }
+      setEditingRecord(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add record");
+      setError(err instanceof Error ? err.message : "Failed to save record");
     }
   };
 
@@ -65,17 +88,46 @@ const RecordsTab = ({ vehicleId }: { vehicleId: string }) => {
     await load();
   };
 
+  const triggerReceiptUpload = (id: string) => {
+    receiptTargetId.current = id;
+    receiptInputRef.current?.click();
+  };
+
+  const handleReceiptSelected = async (file: File) => {
+    const id = receiptTargetId.current;
+    if (!id) return;
+    setUploadingId(id);
+    try {
+      await uploadMaintenanceRecordReceipt(vehicleId, id, file);
+      await load();
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-900">Maintenance Records</h2>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAddModal}
           className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
         >
           + Log Record
         </button>
       </div>
+
+      <input
+        ref={receiptInputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleReceiptSelected(file);
+          e.target.value = "";
+        }}
+      />
 
       {loading ? (
         <p className="text-slate-500 text-sm">Loading...</p>
@@ -89,35 +141,60 @@ const RecordsTab = ({ vehicleId }: { vehicleId: string }) => {
             <Card key={record.id}>
               <div className="flex items-start justify-between">
                 <h3 className="font-medium text-slate-900">{typeName(record.maintenanceType)}</h3>
-                <button
-                  onClick={() => handleDelete(record.id)}
-                  className="text-slate-400 hover:text-red-600 text-sm"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2 text-sm">
+                  <button
+                    onClick={() => openEditModal(record)}
+                    className="text-slate-400 hover:text-brand-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(record.id)}
+                    className="text-slate-400 hover:text-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
               <p className="text-sm text-slate-500 mt-1">
                 {new Date(record.performedAt).toLocaleDateString()} &middot;{" "}
                 {record.mileageAtService.toLocaleString()} km
               </p>
               {record.notes && <p className="text-sm text-slate-600 mt-2">{record.notes}</p>}
-              {record.receiptUrl && (
-                <a
-                  href={record.receiptUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block mt-2 text-sm text-brand-600 hover:underline"
+
+              <div className="flex items-center gap-3 mt-2">
+                {record.receiptUrl && (
+                  <a
+                    href={record.receiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-brand-600 hover:underline"
+                  >
+                    View receipt
+                  </a>
+                )}
+                <button
+                  onClick={() => triggerReceiptUpload(record.id)}
+                  disabled={uploadingId === record.id}
+                  className="text-sm text-slate-500 hover:text-brand-600 disabled:opacity-50"
                 >
-                  View receipt
-                </a>
-              )}
+                  {uploadingId === record.id
+                    ? "Uploading..."
+                    : record.receiptUrl
+                      ? "Replace receipt"
+                      : "Add receipt"}
+                </button>
+              </div>
             </Card>
           ))}
         </div>
       )}
 
-      {showAddModal && (
-        <Modal title="Log Maintenance Record" onClose={() => setShowAddModal(false)}>
+      {editingRecord && (
+        <Modal
+          title={editingRecord === "new" ? "Log Maintenance Record" : "Edit Maintenance Record"}
+          onClose={() => setEditingRecord(null)}
+        >
           {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div>
@@ -177,7 +254,7 @@ const RecordsTab = ({ vehicleId }: { vehicleId: string }) => {
               disabled={isSubmitting}
               className="w-full py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? "Saving..." : "Log Record"}
+              {isSubmitting ? "Saving..." : editingRecord === "new" ? "Log Record" : "Save Changes"}
             </button>
           </form>
         </Modal>

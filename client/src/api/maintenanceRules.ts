@@ -18,5 +18,14 @@ export const createMaintenanceRule = (vehicleId: string, data: CreateMaintenance
     .post<MaintenanceRule>(`/vehicles/${vehicleId}/maintenance-rules`, data)
     .then((r) => r.data);
 
+export const updateMaintenanceRule = (
+  vehicleId: string,
+  id: string,
+  data: Partial<CreateMaintenanceRuleInput>
+) =>
+  axiosInstance
+    .patch<MaintenanceRule>(`/vehicles/${vehicleId}/maintenance-rules/${id}`, data)
+    .then((r) => r.data);
+
 export const deleteMaintenanceRule = (vehicleId: string, id: string) =>
   axiosInstance.delete(`/vehicles/${vehicleId}/maintenance-rules/${id}`);

@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMaintenanceStatus } from "@/api/maintenanceStatus";
 import { getMaintenanceTypes } from "@/api/maintenanceTypes";
+import { uploadVehiclePhoto } from "@/api/vehicles";
 import type { MaintenanceStatus, MaintenanceType, Vehicle } from "@/types";
 import Card from "@/components/Card";
 import StatusBadge from "@/components/StatusBadge";
 
-const OverviewTab = ({ vehicle }: { vehicle: Vehicle }) => {
+type Props = {
+  vehicle: Vehicle;
+  onVehicleChange: (vehicle: Vehicle) => void;
+};
+
+const OverviewTab = ({ vehicle, onVehicleChange }: Props) => {
   const [statuses, setStatuses] = useState<MaintenanceStatus[]>([]);
   const [types, setTypes] = useState<MaintenanceType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     Promise.all([getMaintenanceStatus(vehicle.id), getMaintenanceTypes()]).then(
@@ -22,17 +30,47 @@ const OverviewTab = ({ vehicle }: { vehicle: Vehicle }) => {
 
   const typeName = (id: string) => types.find((t) => t.id === id)?.name ?? "Unknown";
 
+  const handlePhotoSelected = async (file: File) => {
+    setUploading(true);
+    try {
+      const updated = await uploadVehiclePhoto(vehicle.id, file);
+      onVehicleChange(updated);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <div className="flex items-start gap-6">
-          {vehicle.photo ? (
-            <img src={vehicle.photo} alt="" className="w-32 h-32 object-cover rounded-xl" />
-          ) : (
-            <div className="w-32 h-32 bg-slate-100 rounded-xl flex items-center justify-center text-4xl">
-              🚗
-            </div>
-          )}
+          <div className="relative w-32 h-32 shrink-0 group">
+            {vehicle.photo ? (
+              <img src={vehicle.photo} alt="" className="w-32 h-32 object-cover rounded-xl" />
+            ) : (
+              <div className="w-32 h-32 bg-slate-100 rounded-xl flex items-center justify-center text-4xl">
+                🚗
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 flex items-center justify-center rounded-xl bg-slate-900/0 group-hover:bg-slate-900/50 text-transparent group-hover:text-white text-xs font-medium transition-colors"
+            >
+              {uploading ? "Uploading..." : "Change photo"}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handlePhotoSelected(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
             <div>
               <span className="text-slate-400">Make/Model</span>

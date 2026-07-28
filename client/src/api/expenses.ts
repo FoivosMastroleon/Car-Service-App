@@ -15,6 +15,9 @@ export const getExpenses = (vehicleId: string) =>
 export const createExpense = (vehicleId: string, data: CreateExpenseInput) =>
   axiosInstance.post<Expense>(`/vehicles/${vehicleId}/expenses`, data).then((r) => r.data);
 
+export const updateExpense = (vehicleId: string, id: string, data: Partial<CreateExpenseInput>) =>
+  axiosInstance.patch<Expense>(`/vehicles/${vehicleId}/expenses/${id}`, data).then((r) => r.data);
+
 export const deleteExpense = (vehicleId: string, id: string) =>
   axiosInstance.delete(`/vehicles/${vehicleId}/expenses/${id}`);
 
