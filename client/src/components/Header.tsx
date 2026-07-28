@@ -11,30 +11,38 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <Link to="/" className="font-semibold text-lg">
-        CarCare AI
-      </Link>
+    <header className="bg-brand-700 text-white">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <Link to="/" className="font-semibold text-lg tracking-tight">
+          🚗 CarCare AI
+        </Link>
 
-      <nav className="flex items-center gap-4 text-sm">
-        {isAuthenticated ? (
-          <>
-            <span className="text-gray-500">{user?.username}</span>
-            <button onClick={handleLogout} className="text-gray-700 hover:underline">
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="text-gray-700 hover:underline">
-              Login
-            </Link>
-            <Link to="/register" className="text-gray-700 hover:underline">
-              Register
-            </Link>
-          </>
-        )}
-      </nav>
+        <div className="flex items-center gap-4 text-sm">
+          {isAuthenticated ? (
+            <>
+              <span className="text-brand-100">Hi, {user?.username}</span>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 rounded-lg bg-brand-800 hover:bg-brand-900 transition-colors"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="hover:underline">
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="px-3 py-1.5 rounded-lg bg-white text-brand-700 font-medium hover:bg-brand-50 transition-colors"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
     </header>
   );
 };
